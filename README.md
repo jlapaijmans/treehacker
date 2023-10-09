@@ -6,7 +6,7 @@ In its current form, it is probably not very straightforward to use out-of-the-b
 
 You are free to use treehacker and adapt it to your needs, if you do please cite:
 
-*Lucena-Perez M, et al (2023) Recent increase in species-wide diversity after interspecies introgression in a highly endangered felid. Nature Ecology and Evolution IN PRESS*
+*Lucena-Perez M, et al (2023). Nature Ecology and Evolution IN PRESS*
 
 And/or the original development of the method:
 
