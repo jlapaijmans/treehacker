@@ -37,3 +37,7 @@ jobs:
       - name: Installing requirements apt
         run: |
           sudo apt install samtools bedtools bioawk bc seqtk
+
+      # test treehacker
+      - name: test file
+        run: Rscript ./test/treehacker_test.R
