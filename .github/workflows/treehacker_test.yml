@@ -31,7 +31,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Installing requirements conda
-        run: conda install python=3.10 bioconda::newick_utils
+        run: conda install -c conda-forge -c bioconda newick_utils
 
       # Runs a set of commands using the runners shell
       - name: Installing requirements apt
