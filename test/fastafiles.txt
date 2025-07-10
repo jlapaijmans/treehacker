@@ -1,0 +1,4 @@
+fasta1.fasta
+fasta2.fasta
+fasta3.fasta
+fasta4.fasta
