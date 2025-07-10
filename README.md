@@ -1,12 +1,12 @@
 # TreeHacker
 
-This tool was developed by Johanna Paijmans and Axel Barlow specifically for the topology test used in Lucena-Perez et al. 2023 (Nature Ecology & Evolution). The method was originally developed in [Barlow et al 2018](https://doi.org/10.1038/s41559-018-0654-8) (Nature Ecology & Evolution).
+This tool was developed by Johanna Paijmans and Axel Barlow to do topology tests in sliding windows along the genome. The method was originally developed in [Barlow et al 2018](https://doi.org/10.1038/s41559-018-0654-8) (Nature Ecology & Evolution).
 
 In its current form, it is probably not very straightforward to use out-of-the-box for other projects, but we are (slowly) working to make it more user friendly. Feel free to contact us if you have any questions.
 
 You are free to use treehacker and adapt it to your needs, if you do please cite:
 
-*Lucena-Perez M, et al (2023). Nature Ecology and Evolution IN PRESS*
+*Lucena-Perez M, et al (2024)*
 
 And/or the original development of the method:
 
@@ -45,6 +45,3 @@ $3	window size. TreeHacker is currently hardcoded for non-overlapping windows
 7. Runs RAXML with BINGAMMA model
 8. Creates a summary from all windows that gives all topologies and the number of times that topology occurred, for both the DNA and BIN alignments: "$outname"_RAxML_bestTrees.txt and "$outname"_RAxML_bestTrees_BIN.txt
 
-## Plans
-
-To make the tool more universally usable, we are thinking of implementing a "treehacker.conf" file in which the user can define all relevant variables
