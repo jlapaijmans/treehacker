@@ -44,4 +44,5 @@ jobs:
 
       # test treehacker
       - name: Test with testthat
-        run: Rscript ./test/treehacker_test.R
+        working-directory: ./test
+        run: Rscript ./treehacker_test.R
