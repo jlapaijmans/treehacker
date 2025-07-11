@@ -19,6 +19,10 @@ if (dir.exists("./output_*")){
 test_that("TREEhacker runs successfully",{
   res <- system2("../TREEhacker_1.0_raxml_DNA-BIN_NsFilter.sh"," fastafiles.txt test 20 20 0.5 DNA",
           stdout=TRUE)
+  # check if the output files are created
   expect_true(file.exists("fasta1_20_20s_wins.fasta"))
+  # check if the output directory is created
   expect_true(dir.exists("output_TREEhackerFiles_test/"))
+  # check if the tree files are created in the output directory
+  expect_true(file.exists("*bestTree"))
 })

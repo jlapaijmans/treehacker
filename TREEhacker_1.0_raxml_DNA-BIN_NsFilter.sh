@@ -145,6 +145,158 @@ fi
 
 echo "Analysis type: $analysis_type"
 
+### Function to check file existence and dependencies
+check_files_and_dependencies() {
+    local error_count=0
+    
+    echo "═══════════════════════════════════════════════════════════════"
+    echo "                    TREEhacker File Check                      "
+    echo "═══════════════════════════════════════════════════════════════"
+    
+    # Check 1: Fastafiles list file
+    echo "1. Checking fastafiles list..."
+    if [[ ! -f "$fastafiles" ]]; then
+        echo "   ❌ ERROR: Fastafiles list '$fastafiles' not found!"
+        echo "   📁 Expected location: $(pwd)/$fastafiles"
+        echo "   💡 Solution: Create this file by running:"
+        echo "      ls *.fasta > $fastafiles"
+        echo "      (Make sure the outgroup is the last entry)"
+        echo ""
+        ((error_count++))
+    else
+        echo "   ✅ Found fastafiles list: $fastafiles"
+        
+        # Check 2: Individual FASTA files
+        echo "2. Checking individual FASTA files..."
+        local missing_files=0
+        local file_count=0
+        
+        while IFS= read -r fasta_file; do
+            # Skip empty lines and comments
+            [[ -z "$fasta_file" || "$fasta_file" =~ ^[[:space:]]*# ]] && continue
+            
+            ((file_count++))
+            if [[ ! -f "$fasta_file" ]]; then
+                if [[ $missing_files -eq 0 ]]; then
+                    echo "   ❌ Missing FASTA files:"
+                fi
+                echo "      • $fasta_file"
+                echo "        Expected at: $(pwd)/$fasta_file"
+                ((missing_files++))
+                ((error_count++))
+            fi
+        done < "$fastafiles"
+        
+        if [[ $missing_files -eq 0 ]]; then
+            echo "   ✅ All $file_count FASTA files found"
+            
+            # Check for FASTA index files (.fai)
+            echo "3. Checking for FASTA index files (.fai)..."
+            local missing_indices=0
+            while IFS= read -r fasta_file; do
+                [[ -z "$fasta_file" || "$fasta_file" =~ ^[[:space:]]*# ]] && continue
+                
+                if [[ ! -f "$fasta_file.fai" ]]; then
+                    if [[ $missing_indices -eq 0 ]]; then
+                        echo "   ⚠️  Missing FASTA index files (will be created automatically):"
+                    fi
+                    echo "      • $fasta_file.fai"
+                    ((missing_indices++))
+                fi
+            done < "$fastafiles"
+            
+            if [[ $missing_indices -eq 0 ]]; then
+                echo "   ✅ All FASTA index files found"
+            else
+                echo "   💡 Note: Missing .fai files will be created by samtools automatically"
+            fi
+        else
+            echo "   💡 Solution: Ensure all FASTA files are in the current directory:"
+            echo "      $(pwd)"
+            echo "   💡 Or update the paths in '$fastafiles' to point to the correct locations"
+        fi
+        echo ""
+    fi
+    
+    # Check 3: Required software dependencies
+    echo "4. Checking required software dependencies..."
+    local tools_to_check=("$samtools" "$bedtools" "$seqtk" "$bioawk" "$raxml" "bc")
+    local optional_tools=("nw_topology" "nw_order")
+    local missing_tools=0
+    
+    for tool in "${tools_to_check[@]}"; do
+        if ! command -v "$tool" &> /dev/null; then
+            if [[ $missing_tools -eq 0 ]]; then
+                echo "   ❌ Missing required tools:"
+            fi
+            echo "      • $tool"
+            ((missing_tools++))
+            ((error_count++))
+        fi
+    done
+    
+    if [[ $missing_tools -eq 0 ]]; then
+        echo "   ✅ All required tools found"
+    else
+        echo "   💡 Solution: Install missing tools using your package manager"
+        echo "      Examples:"
+        echo "      • Ubuntu/Debian: sudo apt install samtools bedtools seqtk bioawk raxml-ng bc"
+        echo "      • Conda: conda install -c bioconda samtools bedtools seqtk bioawk raxml-ng bc"
+    fi
+    
+    # Check optional tools
+    local missing_optional=0
+    for tool in "${optional_tools[@]}"; do
+        if ! command -v "$tool" &> /dev/null; then
+            if [[ $missing_optional -eq 0 ]]; then
+                echo "   ⚠️  Missing optional tools (tree topology analysis will be skipped):"
+            fi
+            echo "      • $tool"
+            ((missing_optional++))
+        fi
+    done
+    
+    if [[ $missing_optional -eq 0 ]]; then
+        echo "   ✅ All optional tools found"
+    else
+        echo "   💡 To enable topology analysis: conda install -c bioconda newick-utils"
+    fi
+    
+    # Check 4: Output directory
+    echo "5. Checking output directory..."
+    if [[ -d "output_TREEhackerFiles_$outname/" ]]; then
+        echo "   ❌ ERROR: Output directory 'output_TREEhackerFiles_$outname/' already exists!"
+        echo "   📁 Location: $(pwd)/output_TREEhackerFiles_$outname/"
+        echo "   💡 Solution: Remove the directory or choose a different output name:"
+        echo "      rm -rf output_TREEhackerFiles_$outname/"
+        echo "      # OR use a different output name"
+        ((error_count++))
+    else
+        echo "   ✅ Output directory name is available"
+    fi
+    
+    echo "═══════════════════════════════════════════════════════════════"
+    
+    # Summary
+    if [[ $error_count -eq 0 ]]; then
+        echo "🎉 All checks passed! Ready to run TREEhacker."
+        echo "═══════════════════════════════════════════════════════════════"
+        return 0
+    else
+        echo "❌ Found $error_count error(s). Please fix the issues above before running TREEhacker."
+        echo "═══════════════════════════════════════════════════════════════"
+        return 1
+    fi
+}
+
+# Run file and dependency checks
+if ! check_files_and_dependencies; then
+    echo ""
+    echo "For detailed usage information, run:"
+    echo "./TREEhacker_1.0_raxml_DNA-BIN_NsFilter.sh --help"
+    exit 1
+fi
+
 # use the one below if you prefer humanised numbering "10mb" over "10000000"
 #win_size=$(numfmt --to=si --suffix=b --format=%.0f $3)
 #step_size=$(numfmt --to=si --suffix=b --format=%.0f $4)
@@ -241,8 +393,7 @@ run_raxml_for_window() {
 }
 
 ### preamble:
-# make necessary directory
-[[ -d output_TREEhackerFiles_"$outname"/ ]] && { echo "Output folder output_TREEhackerFiles_"$outname"/ exists, remove or select different folder"; exit 1; }
+# Create output directory (already checked that it doesn't exist)
 mkdir output_TREEhackerFiles_"$outname"/
 
 ### the script

@@ -6,7 +6,7 @@ In its current form, it is probably not very straightforward to use out-of-the-b
 
 You are free to use treehacker and adapt it to your needs, if you do please cite:
 
-*Lucena-Perez M, et al (2024)*
+*Lucena-Perez M, et al (2024)* 
 
 And/or the original development of the method:
 
