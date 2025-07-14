@@ -41,6 +41,11 @@ DESCRIPTION:
 USAGE:
     ./TREEhacker_1.0.sh [OPTIONS] <fastanames> <output> <winsize> <stepsize> <prop_missing> [analysis_type]
 
+OPTIONS:
+    --help, -h          Show this help message and exit
+    --threads N         Number of threads per RAxML job (default: 2)
+    --parallel N        Number of parallel RAxML jobs (default: 4)
+
 PARAMETERS:
     fastafiles      File containing full filenames of fasta files (one per line)
                     Example: ls *.fasta > fastafiles.txt
@@ -67,6 +72,9 @@ OPTIONS:
 EXAMPLES:
     # Basic usage with both DNA and binary analysis in 1000bp non-overlapping windows, allowing 30% missing data:
     ./TREEhacker_1.0.sh fastafiles.txt results 1000 1000 0.3 BOTH
+    
+    # Use 8 parallel jobs with 4 threads each:
+    ./TREEhacker_1.0.sh --parallel 8 --threads 4 fastafiles.txt results 1000 1000 0.3 BOTH
 
 REQUIRED SOFTWARE:
     • samtools       - For sequence indexing and extraction
@@ -101,11 +109,51 @@ VERSION: 1.0
 EOF
 }
 
-# Check for help flags or insufficient parameters
-if [[ "$1" == "--help" || "$1" == "-h" ]]; then
-    show_help
-    exit 0
-elif [[ $# -lt 5 ]]; then
+# Initialize default values
+threads=2                 # number of threads RAXML uses
+max_parallel_jobs=4       # maximum number of parallel RAxML jobs
+
+# Parse command line arguments
+POSITIONAL_ARGS=()
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --help|-h)
+            show_help
+            exit 0
+            ;;
+        --threads)
+            threads="$2"
+            if ! [[ "$threads" =~ ^[0-9]+$ ]] || [[ "$threads" -lt 1 ]]; then
+                echo "Error: --threads must be a positive integer (got: $threads)"
+                exit 1
+            fi
+            shift 2
+            ;;
+        --parallel)
+            max_parallel_jobs="$2"
+            if ! [[ "$max_parallel_jobs" =~ ^[0-9]+$ ]] || [[ "$max_parallel_jobs" -lt 1 ]]; then
+                echo "Error: --parallel must be a positive integer (got: $max_parallel_jobs)"
+                exit 1
+            fi
+            shift 2
+            ;;
+        --*)
+            echo "Error: Unknown option $1"
+            echo "Run './TREEhacker_1.0.sh --help' for usage information."
+            exit 1
+            ;;
+        *)
+            POSITIONAL_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+# Restore positional parameters
+set -- "${POSITIONAL_ARGS[@]}"
+
+# Check for insufficient parameters
+if [[ $# -lt 5 ]]; then
     echo "   ERROR: Insufficient parameters provided."
     echo "   Required: fastafiles output winsize stepsize prop_missing [analysis_type]"
     echo "   Provided: $# parameters"
@@ -113,10 +161,6 @@ elif [[ $# -lt 5 ]]; then
     echo "Run './TREEhacker_1.0.sh --help' for detailed usage information."
     exit 1
 fi
-
-### variables
-threads=2                 # number of threads RAXML uses
-max_parallel_jobs=4       # maximum number of parallel RAxML jobs
 
 ### tools
 samtools=samtools     		# path to samtools executable of choice
