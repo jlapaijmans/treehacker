@@ -37,7 +37,7 @@ jobs:
       - name: Installing requirements apt
         run: |
           sudo apt install samtools bedtools bioawk bc seqtk
-          ../TREEhacker_1.0_raxml_DNA-BIN_NsFilter.sh
+          ./TREEhacker_1.0_raxml_DNA-BIN_NsFilter.sh
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
