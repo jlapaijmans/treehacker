@@ -50,4 +50,5 @@ jobs:
         working-directory: ./test
         run: |
           conda activate treehackerenv
+          ./TREEhacker_1.0.sh test/fastafiles.txt test 20 20 0.5 DNA
           Rscript ./treehacker_test.R
