@@ -220,8 +220,7 @@ check_files_and_dependencies() {
     
     # Check 3: Required software dependencies
     echo "4. Checking required software dependencies..."
-    local tools_to_check=("$samtools" "$bedtools" "$seqtk" "$bioawk" "$raxml" "bc")
-    local optional_tools=("nw_topology" "nw_order")
+    local tools_to_check=("$samtools" "$bedtools" "$seqtk" "$bioawk" "$raxml" "bc" "nw_topology" "nw_order")
     local missing_tools=0
     
     for tool in "${tools_to_check[@]}"; do
@@ -241,25 +240,7 @@ check_files_and_dependencies() {
         echo "   💡 Solution: Install missing tools using your package manager"
         echo "      Examples:"
         echo "      • Ubuntu/Debian: sudo apt install samtools bedtools seqtk bioawk raxml-ng bc"
-        echo "      • Conda: conda install -c bioconda samtools bedtools seqtk bioawk raxml-ng bc"
-    fi
-    
-    # Check optional tools
-    local missing_optional=0
-    for tool in "${optional_tools[@]}"; do
-        if ! command -v "$tool" &> /dev/null; then
-            if [[ $missing_optional -eq 0 ]]; then
-                echo "   ⚠️  Missing optional tools (tree topology analysis will be skipped):"
-            fi
-            echo "      • $tool"
-            ((missing_optional++))
-        fi
-    done
-    
-    if [[ $missing_optional -eq 0 ]]; then
-        echo "   ✅ All optional tools found"
-    else
-        echo "   💡 To enable topology analysis: conda install -c bioconda newick-utils"
+        echo "      • Conda: conda install -c bioconda samtools bedtools seqtk bioawk raxml-ng bc newick-utils"
     fi
     
     # Check 4: Output directory
@@ -488,22 +469,14 @@ rm -f "$outname"_RaXML_BIN-run_thread*.log
 if [[ "$analysis_type" == "DNA" || "$analysis_type" == "BOTH" ]]; then
     echo "Summarizing DNA trees..."
     find ./output_TREEhackerFiles_"$outname"/ -type f -name '*.concat.RN.fasta.raxml.bestTree' -exec cat {} + > "$outname"_raxml_trees.txt 2>/dev/null
-    if command -v nw_topology &> /dev/null && command -v nw_order &> /dev/null; then
-        nw_topology "$outname"_raxml_trees.txt | nw_order - | sort | uniq -c > "$outname"_raxml_trees_TOPO.txt
-    else
-        echo "Warning: nw_utils not available, skipping topology analysis for DNA trees"
-    fi
+    nw_topology "$outname"_raxml_trees.txt | nw_order - | sort | uniq -c > "$outname"_raxml_trees_TOPO.txt
 fi
 
 # BINARY
 if [[ "$analysis_type" == "BIN" || "$analysis_type" == "BOTH" ]]; then
     echo "Summarizing BIN trees..."
     find ./output_TREEhackerFiles_"$outname"/ -type f -name '*.concat.RN.BIN.fasta.raxml.bestTree' -exec cat {} + > "$outname"_raxml_trees_BIN.txt 2>/dev/null
-    if command -v nw_topology &> /dev/null && command -v nw_order &> /dev/null; then
-        nw_topology "$outname"_raxml_trees_BIN.txt | nw_order - | sort | uniq -c > "$outname"_raxml_trees_TOPO_BIN.txt
-    else
-        echo "Warning: nw_utils not available, skipping topology analysis for BIN trees"
-    fi
+    nw_topology "$outname"_raxml_trees_BIN.txt | nw_order - | sort | uniq -c > "$outname"_raxml_trees_TOPO_BIN.txt
 fi
 
 
