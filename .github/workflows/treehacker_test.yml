@@ -42,6 +42,9 @@ jobs:
         run: |
           conda activate treehackerenv
           ./TREEhacker_1.0.sh --help
+          cd test/
+          ../TREEhacker_1.0.sh fastafiles.txt test 20 20 0.5 DNA --threads 1 --parallel 1
+          ls output*
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
@@ -50,5 +53,4 @@ jobs:
         working-directory: ./test
         run: |
           conda activate treehackerenv
-          ../TREEhacker_1.0.sh fastafiles.txt test 20 20 0.5 DNA --threads 1 --parallel 1
           Rscript ./treehacker_test.R
