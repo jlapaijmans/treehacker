@@ -1,10 +1,8 @@
 
 # run tests with
-# Rscript ./test_consensify.R
+# Rscript ./treehacker_test.R
 
 if(!require("testthat", quietly = TRUE)) install.packages("testthat")
-if(!require("ape", quietly = TRUE)) install.packages("ape")
-
 
 library(testthat)
 # remove the old test fasta file if it still exists
