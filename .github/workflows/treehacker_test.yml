@@ -41,7 +41,8 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run help message treehacker
         run: |
-          ./TREEhacker_1.0_raxml_DNA-BIN_NsFilter.sh --help
+          ./TREEhacker_1.0.sh --help
+          ./TREEhacker_1.0.sh test/fastafiles.txt test 20 20 0.5 DNA
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
