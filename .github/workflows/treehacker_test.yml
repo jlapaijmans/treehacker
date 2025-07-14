@@ -12,36 +12,43 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash -el {0}  # login shell so conda works
+        shell: bash -el {0}  # Required to source conda properly
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Miniconda
+      # Install Miniconda and initialize conda
+      - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          environment-name: treeenv
-          auto-activate-base: false
-          activate-environment: treeenv
+          auto-update-conda: true
+          auto-activate-base: false  # Don't activate base
           channels: conda-forge,bioconda
-          packages: newick_utils raxml-ng
+          activate-environment: treehackerenv
 
-      - name: Install APT packages (samtools, etc)
+      - name: Create conda environment
+        run: |
+          conda create -n treehackerenv -y -c conda-forge -c bioconda newick_utils raxml-ng
+          conda activate treehackerenv
+          which raxml-ng
+          raxml-ng --help
+
+      - name: Install APT packages
         run: |
           sudo apt update
           sudo apt install -y samtools bedtools bioawk bc seqtk
 
-      - name: Run TREEhacker and raxml-ng check
+      - name: Run TREEhacker
         run: |
-          which raxml-ng
-          raxml-ng --help
+          conda activate treehackerenv
           ./TREEhacker_1.0.sh --help
           ./TREEhacker_1.0.sh test/fastafiles.txt test 20 20 0.5 DNA
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
 
-      - name: Test with testthat
+      - name: Run R tests
         working-directory: ./test
         run: |
+          conda activate treehackerenv
           Rscript ./treehacker_test.R
