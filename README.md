@@ -1,3 +1,9 @@
+<!-- badges: start -->
+
+[![conda-single-platform](https://github.com/treehacker/actions/workflows/treehacker_test.yml/badge.svg)](https://github.com/EvolEcolGroup/cisgem_genetic_workflow/actions/workflows/conda-single-platform.yml)
+<!-- badges: end -->
+
+
 # TreeHacker
 
 This tool was developed by Johanna Paijmans and Axel Barlow to do topology tests in sliding windows along the genome. The method was originally developed in [Barlow et al 2018](https://doi.org/10.1038/s41559-018-0654-8) (Nature Ecology & Evolution).
