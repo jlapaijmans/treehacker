@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash -el {0}  # Login shell for conda to work properly
+        shell: bash -el {0}  # login shell so conda works
 
     steps:
       - uses: actions/checkout@v4
@@ -20,14 +20,11 @@ jobs:
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          auto-update-conda: true
-          activate-environment: base
-          auto-activate-base: true  # makes conda tools available immediately
+          environment-name: treeenv
+          auto-activate-base: false
+          activate-environment: treeenv
           channels: conda-forge,bioconda
-
-      - name: Install Conda packages (raxml-ng + newick_utils)
-        run: |
-          conda install -y newick_utils raxml-ng
+          packages: newick_utils raxml-ng
 
       - name: Install APT packages (samtools, etc)
         run: |
@@ -36,8 +33,9 @@ jobs:
 
       - name: Run TREEhacker and raxml-ng check
         run: |
+          which raxml-ng
+          raxml-ng --help
           ./TREEhacker_1.0.sh --help
-          raxml-ng --help  # Should now work
           ./TREEhacker_1.0.sh test/fastafiles.txt test 20 20 0.5 DNA
 
       - name: Set up R
