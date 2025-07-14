@@ -27,7 +27,7 @@ test_that("TREEhacker runs successfully",{
   expect_true(file.exists("output_TREEhackerFiles_test/scaffold_1_0-20.concat.RN.BIN.fasta.raxml.bestTree"))
   expect_true(file.exists("output_TREEhackerFiles_test/scaffold_1_0-20.concat.RN.fasta.raxml.bestTree"))
   # remove output files
-  unlink("./*win*.fasta")
+  unlink("./*win*.fasta*")
   unlink("test*")
   # remove output directory
   unlink("output_TREEhackerFiles_test", recursive = TRUE)
@@ -39,7 +39,7 @@ test_that("TREEhacker filters windows properly",{
           stdout=TRUE)
   # check if output files are created for scaffold_3_0-20 as it should pass 0.5 filter
   expect_true(file.exists("output_TREEhackerFiles_test/scaffold_3_0-20.concat.RN.fasta.raxml.bestTree"))
-  unlink("*_wins.fasta")
+  unlink("*_wins.fasta*")
   unlink("test*")
   # remove output directory
   unlink("output_TREEhackerFiles_test", recursive = TRUE)
@@ -48,7 +48,7 @@ test_that("TREEhacker filters windows properly",{
   res <- system2("../TREEhacker_1.0_raxml_DNA-BIN_NsFilter.sh"," fastafiles.txt test 20 20 0.1 DNA",
           stdout=TRUE)
   expect_false(file.exists("output_TREEhackerFiles_test/scaffold_3_0-20.concat.RN.fasta.raxml.bestTree"))
-  unlink("*_wins.fasta")
+  unlink("*_wins.fasta*")
   unlink("test*")
   # remove output directory
   unlink("output_TREEhackerFiles_test", recursive = TRUE)
