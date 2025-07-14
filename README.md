@@ -1,6 +1,6 @@
 <!-- badges: start -->
 
-[![treehacker basic tests](https://github.com/treehacker/actions/workflows/treehacker_test.yml/badge.svg)](https://github.com/treehacker/actions/workflows/treehacker_test.yml)
+[![Treehacker CI](https://github.com/jlapaijmans/treehacker/actions/workflows/treehacker_test.yml/badge.svg)](https://github.com/jlapaijmans/treehacker/actions/workflows/treehacker_test.yml)
 <!-- badges: end -->
 
 
