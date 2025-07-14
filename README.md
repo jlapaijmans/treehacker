@@ -150,3 +150,50 @@ $3	window size. TreeHacker is currently hardcoded for non-overlapping windows
 
 The legacy input format and hardcoded variables have been replaced with a flexible command-line interface while maintaining full backward compatibility of the analysis methodology.
 
+## Troubleshooting & Common Issues
+
+### 🔄 Recovery from Failed Runs
+
+TreeHacker is designed to resume partially completed analyses:
+- Window files (`*_wins.fasta`) are preserved and reused
+- Missing data reports are cached
+- Only missing tree files will be recalculated
+
+To force a complete restart:
+```bash
+# Remove all intermediate files
+rm -f *_wins.fasta*
+rm -f *_missing_data_report.txt
+rm -f *_filtered_wins.txt
+rm -rf output_TREEhackerFiles_*
+```
+
+### 🚨 Critical Issues
+
+#### Sample/Sequence Mismatch Error
+If you see:
+```
+Error: Mismatch between number of samples and sequences in window [window_name]
+```
+
+**Causes:**
+- Corrupted or inconsistent FASTA files
+- Issues with sequence extraction from windows  
+- Problems with the fastafiles.txt list
+- Inconsistent file naming
+
+**Solutions:**
+1. Verify all FASTA files are properly formatted
+2. Check that filenames in `fastafiles.txt` exactly match actual files
+3. Ensure all FASTA files have the same sequence structure
+4. Re-index FASTA files: `samtools faidx yourfile.fasta`
+
+### ⚠️ Process Management Issues
+
+#### Canceling with Ctrl+C
+**Problem:** When using parallel processing (`--parallel > 1`), pressing Ctrl+C once may not stop all background processes.
+
+**Solution:** 
+- Press **Ctrl+C multiple times** (2-4 times) to ensure all background RAxML jobs are terminated
+- Alternatively, use `killall raxml-ng` to forcefully stop all RAxML processes
+- Or use `ps aux | grep raxml` to find and kill individual processes
