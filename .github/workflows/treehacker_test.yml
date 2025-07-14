@@ -1,54 +1,48 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Treehacker CI
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash -el {0}
+        shell: bash -el {0}  # Login shell for conda to work properly
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          activate-environment: base
+          auto-activate-base: true  # makes conda tools available immediately
+          channels: conda-forge,bioconda
 
-      # Installing newick utils and raxml using conda
-      - name: Installing requirements conda
-        run: conda install -c conda-forge -c bioconda newick_utils raxml-ng
-
-      # Runs a set of commands using the runners shell
-      - name: Installing requirements apt
+      - name: Install Conda packages (raxml-ng + newick_utils)
         run: |
-          sudo apt install samtools bedtools bioawk bc seqtk
+          conda install -y newick_utils raxml-ng
 
-      # Runs a set of commands using the runners shell
-      - name: Run help message treehacker
+      - name: Install APT packages (samtools, etc)
+        run: |
+          sudo apt update
+          sudo apt install -y samtools bedtools bioawk bc seqtk
+
+      - name: Run TREEhacker and raxml-ng check
         run: |
           ./TREEhacker_1.0.sh --help
-          raxml-ng --help
+          raxml-ng --help  # Should now work
           ./TREEhacker_1.0.sh test/fastafiles.txt test 20 20 0.5 DNA
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
 
-      # test treehacker
       - name: Test with testthat
         working-directory: ./test
         run: |
