@@ -1,6 +1,6 @@
 <!-- badges: start -->
 
-[![conda-single-platform](https://github.com/treehacker/actions/workflows/treehacker_test.yml/badge.svg)](https://github.com/EvolEcolGroup/cisgem_genetic_workflow/actions/workflows/conda-single-platform.yml)
+[![conda-single-platform](https://github.com/treehacker/actions/workflows/treehacker_test.yml/badge.svg)](https://github.com/treehacker/actions/workflows/treehacker_test.yml)
 <!-- badges: end -->
 
 
