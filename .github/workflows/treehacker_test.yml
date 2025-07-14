@@ -29,9 +29,6 @@ jobs:
       - name: Create conda environment
         run: |
           conda create -n treehackerenv -y -c conda-forge -c bioconda newick_utils raxml-ng
-          conda activate treehackerenv
-          which raxml-ng
-          raxml-ng --help
 
       - name: Install APT packages
         run: |
