@@ -379,9 +379,12 @@ run_raxml_for_window() {
     if [ $(wc -l < "$temp_basenames") -eq $(wc -l < "$temp_sequences") ]; then
         paste "$temp_basenames" "$temp_sequences" | awk '{print ">"$1"\n"$2}' > output_TREEhackerFiles_"$outname"/"$filtered_win".concat.RN.fasta
     else
+        # Error handling for mismatch and exit script
         echo "Error: Mismatch between number of samples and sequences in window $filtered_win" >&2
-        # Fallback: use original sequence headers
-        cp output_TREEhackerFiles_"$outname"/"$filtered_win".concat.fasta output_TREEhackerFiles_"$outname"/"$filtered_win".concat.RN.fasta
+        echo "Window: $filtered_win - Sample count: $(wc -l < "$temp_basenames"), Sequence count: $(wc -l < "$temp_sequences")" >&2
+        echo "Press ENTER to exit" >&2
+        rm -f "$temp_basenames" "$temp_sequences"
+        kill $$  # Kill the main script process immediately
     fi
     
     rm -f "$temp_basenames" "$temp_sequences"
@@ -404,7 +407,7 @@ run_raxml_for_window() {
     fi
 
     # mv some files to stay within quota 
-    rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.fasta
+    rm -f output_TREEhackerFiles_"$outname"/"$filtered_win"*.concat.fasta
     rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.log
     rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.mlTrees
     rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.bestModel
