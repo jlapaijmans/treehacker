@@ -403,8 +403,8 @@ run_raxml_for_window() {
         [[ -f output_TREEhackerFiles_"$outname"/"$filtered_win".concat.RN.BIN.fasta ]] && $raxml --threads $threads --model BIN+G --outgroup "$outgroup" --seed 12345 --msa output_TREEhackerFiles_"$outname"/"$filtered_win".concat.RN.BIN.fasta --prefix "$(pwd)"/output_TREEhackerFiles_"$outname"/"$filtered_win".concat.RN.BIN.fasta >> "$(pwd)"/"$outname"_RaXML_BIN-run_thread"$thread_id".log 2>&1;
     fi
 
-    # mv some files to stay within quota
-    #rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.fasta
+    # mv some files to stay within quota 
+    rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.fasta
     rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.log
     rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.mlTrees
     rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.bestModel
