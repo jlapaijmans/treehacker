@@ -31,6 +31,24 @@ test_that("TREEhacker runs successfully",{
   unlink("output_TREEhackerFiles_test", recursive = TRUE)
 })
 
+# test with a simple command that it runs at all with zipped input
+test_that("TREEhacker runs successfully with zipped fasta.gz ",{
+  res <- system2("../TREEhacker_1.0.sh"," --threads 1 --parallel 1 fastafiles_gz.txt test 20 20 0.5 BOTH",
+          stdout=TRUE)
+  # check if the output files are created
+  expect_true(file.exists("fasta1_20_20s_wins.fasta"))
+  # check if the output directory is created
+  expect_true(dir.exists("output_TREEhackerFiles_test/"))
+  # check if the tree files are created in the output directory
+  expect_true(file.exists("output_TREEhackerFiles_test/scaffold_1_0-20.concat.RN.BIN.fasta.raxml.bestTree"))
+  expect_true(file.exists("output_TREEhackerFiles_test/scaffold_1_0-20.concat.RN.fasta.raxml.bestTree"))
+  # remove output files
+  unlink("./*win*.fasta*")
+  unlink("test*")
+  # remove output directory
+  unlink("output_TREEhackerFiles_test", recursive = TRUE)
+})
+
 # test if the filtering happens correctly (example scaffold has 5 Ns out of 20 positions)
 test_that("TREEhacker filters windows properly",{
   res <- system2("../TREEhacker_1.0.sh","  --threads 1 --parallel 1 fastafiles.txt test 20 20 0.5 DNA",

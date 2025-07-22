@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### This script extracts inf    ./TREEhacker_1.0.sh [OPTIONS] <fastafiles> <o> <winsize> <stepsize> <prop_missing> [analysis_type]rmative positions from aligned genomes (multi-fasta) and computes a tree for each window
+### This script extracts informative positions from aligned genomes (multi-fasta) and computes a tree for each window
 # Hacked together by Johanna Paijmans
 # Modified to run RAxML calculations in parallel for faster processing
 
@@ -164,8 +164,6 @@ fi
 
 ### tools
 samtools=samtools     		# path to samtools executable of choice
-snpsites=snp-sites    		# path to snp-sites executable
-iqtree=iqtree
 bedtools=bedtools
 seqtk=seqtk
 bioawk=bioawk
@@ -328,8 +326,29 @@ fi
 
 max_ns=$(echo "$3*$5" | bc | xargs printf "%.0f\n")
 
+### Function to extract basename from FASTA files (handles .fasta, .fa, .fasta.gz, .fa.gz)
+get_fasta_basename() {
+    local filepath="$1"
+    local filename=$(basename "$filepath")
+    
+    # Remove .gz first if present
+    if [[ "$filename" == *.gz ]]; then
+        filename="${filename%.gz}"
+    fi
+    
+    # Remove FASTA extensions (.fasta or .fa)
+    if [[ "$filename" == *.fasta ]]; then
+        echo "${filename%.fasta}"
+    elif [[ "$filename" == *.fa ]]; then
+        echo "${filename%.fa}"
+    else
+        # Fallback: remove everything after the first dot
+        echo "${filename%%.*}"
+    fi
+}
+
 # Cache outgroup for efficiency (avoids repeated tail calls)
-outgroup=$(tail -n1 "$fastafiles" | xargs basename -s .fasta)
+outgroup=$(get_fasta_basename "$(tail -n1 "$fastafiles")")
 
 ### Function to wait for available job slot
 wait_for_jobs() {
@@ -358,7 +377,7 @@ run_raxml_for_window() {
     #3. concatenate individuals together (1 file per scaffold)
     for ind in $(cat $fastafiles);
     do
-        ind_name=$(basename "$ind" .fasta)
+        ind_name=$(get_fasta_basename "$ind")
         $samtools faidx "$ind_name"_"$win_size"_"$step_size"s_wins.fasta $filtered_win >> output_TREEhackerFiles_"$outname"/$filtered_win.concat.fasta;
     done;
 
@@ -369,7 +388,7 @@ run_raxml_for_window() {
     
     # Extract basenames
     while read ind; do
-        basename "$ind" .fasta
+        get_fasta_basename "$ind"
     done < $fastafiles > "$temp_basenames"
     
     # Extract sequences
@@ -412,7 +431,6 @@ run_raxml_for_window() {
     rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.mlTrees
     rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.bestModel
     rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.rba
-    rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.phy
     rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.startTree
     rm -f output_TREEhackerFiles_"$outname"/"$filtered_win".*.bestTreeCollapsed
 
@@ -429,8 +447,8 @@ mkdir output_TREEhackerFiles_"$outname"/
 echo "Generating sliding windows for each individual..."
 for ind in $(cat $fastafiles);
 do
-    # Extract basename without extension (e.g., fasta1.fasta -> fasta1)
-    ind_name=$(basename "$ind" .fasta)
+    # Extract basename without extension (handles .fasta, .fa, .fasta.gz, .fa.gz)
+    ind_name=$(get_fasta_basename "$ind")
     if [[ ! -f "$ind_name"_"$win_size"_"$step_size"s_wins.fasta ]]; then
         echo "Processing $ind..."
         $bioawk -c fastx '{print $name"\t0\t"length($seq)}' "$ind" | $bedtools makewindows -b - -w $win_size -s $step_size | $bedtools getfasta -fi "$ind" -bed - -fo stdout | $seqtk seq -L $win_size - | sed 's/:/_/g'> "$ind_name"_"$win_size"_"$step_size"s_wins.fasta
@@ -450,7 +468,7 @@ if [[ ! -f "$outname"_missing_data_report.txt ]]; then
     while read win; do
         printf "%s" "$win"
         for ind in $(cat $fastafiles); do
-            ind_name=$(basename "$ind" .fasta)
+            ind_name=$(get_fasta_basename "$ind")
             n_count=$($samtools faidx "$ind_name"_"$win_size"_"$step_size"s_wins.fasta "$win" | $seqtk comp | awk '{print $9}')
             printf "\t%s" "$n_count"
         done
