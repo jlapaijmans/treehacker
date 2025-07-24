@@ -242,7 +242,7 @@ check_files_and_dependencies() {
                     if [[ $missing_indices -eq 0 ]]; then
                         echo "   ⚠️  Missing FASTA index files (will be created automatically):"
                     fi
-                    echo "      • $fasta_file.fai"
+                    echo "      • $fasta_file"
                     ((missing_indices++))
                 fi
             done < "$fastafiles"
