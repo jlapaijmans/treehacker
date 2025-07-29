@@ -462,7 +462,7 @@ done;
 if [[ ! -f "$outname"_missing_data_report.txt ]]; then
     echo "Generating missing data report..."
     # Get all unique windows first
-    cat *_"$win_size"_"$step_size"s_wins.fasta.fai | awk '{print $1}' | sort -V | uniq > temp_windows_list.txt
+    cat *_"$win_size"_"$step_size"s_wins.fasta.fai | awk '{print $1}' | sort -V | uniq > ${outname}_temp_windows_list.txt
     
     # Process all windows at once to reduce I/O
     while read win; do
@@ -473,9 +473,9 @@ if [[ ! -f "$outname"_missing_data_report.txt ]]; then
             printf "\t%s" "$n_count"
         done
         printf "\n"
-    done < temp_windows_list.txt > "$outname"_missing_data_report.txt
+    done < ${outname}_temp_windows_list.txt > "$outname"_missing_data_report.txt
     
-    rm -f temp_windows_list.txt
+    rm -f ${outname}_temp_windows_list.txt
 fi;
 
 ### filter for windows with more than "$max_ns" N's
