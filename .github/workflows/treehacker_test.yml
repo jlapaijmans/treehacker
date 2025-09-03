@@ -38,7 +38,7 @@ jobs:
       - name: Run TREEhacker
         run: |
           conda activate treehackerenv
-          ./TREEhacker_1.0.sh --help
+          ./TREEhacker.sh --help
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
