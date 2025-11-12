@@ -470,17 +470,37 @@ if [[ ! -f "$outname"_missing_data_report.txt ]]; then
     # Get all unique windows first
     cat *_"$win_size"_"$step_size"s_wins.fasta.fai | awk '{print $1}' | sort -V | uniq > ${outname}_temp_windows_list.txt
     
-    # Process all windows at once to reduce I/O
+    # OPTIMIZED: Process all windows for each individual at once, then combine
+    # This reduces subprocess calls from windows*individuals to just individuals
+    temp_dir="${outname}_temp_missing_data"
+    mkdir -p "$temp_dir"
+    
+    ind_count=0
+    for ind in $(cat $fastafiles); do
+        ind_name=$(get_fasta_basename "$ind")
+        ind_count=$((ind_count + 1))
+        echo "  Processing sample $ind_count: $ind_name"
+        
+        # Extract ALL windows at once and count N's in one pass
+        $samtools faidx "$ind_name"_"$win_size"_"$step_size"s_wins.fasta $(cat ${outname}_temp_windows_list.txt) | \
+            $seqtk comp | \
+            awk '{print $1"\t"$9}' > "$temp_dir"/"$ind_name"_n_counts.txt
+    done
+    
+    # Combine all individual results into the final report
+    echo "  Combining results..."
     while read win; do
         printf "%s" "$win"
         for ind in $(cat $fastafiles); do
             ind_name=$(get_fasta_basename "$ind")
-            n_count=$($samtools faidx "$ind_name"_"$win_size"_"$step_size"s_wins.fasta "$win" | $seqtk comp | awk '{print $9}')
-            printf "\t%s" "$n_count"
+            n_count=$(grep "^${win}[[:space:]]" "$temp_dir"/"$ind_name"_n_counts.txt | cut -f2)
+            printf "\t%s" "${n_count:-0}"
         done
         printf "\n"
     done < ${outname}_temp_windows_list.txt > "$outname"_missing_data_report.txt
     
+    # Cleanup
+    rm -rf "$temp_dir"
     rm -f ${outname}_temp_windows_list.txt
 fi;
 
